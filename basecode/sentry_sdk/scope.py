@@ -1295,8 +1295,26 @@ class Scope(object):
 
     def _apply_breadcrumbs_to_event(self, event, hint, options):
         # type: (Event, Hint, Optional[Dict[str, Any]]) -> None
+        # When breadcrumbs are added with timestamps out of order we still want
+        # to send them chronologically. Historically we would simply extend the
+        # event breadcrumb list with whatever sat in the scope's deque, which
+        # preserved insertion order. That meant two breadcrumbs added with
+        # ``timestamp`` values swapped would show up in the wrong order in Sentry
+        # events. See https://github.com/getsentry/sentry-python/issues/...
+        #
+        # To fix this we copy the breadcrumbs into a list, sort by the
+        # ``timestamp`` key and then extend the event. We don't mutate the
+        # original deque so that the in-memory ordering remains untouched for
+        # users who iterate over it directly.
+        values = list(self._breadcrumbs)
+        try:
+            values.sort(key=lambda b: b.get("timestamp"))
+        except Exception:
+            # Be conservative: if anything weird happens while sorting we fall
+            # back to the original order rather than crashing the SDK.
+            pass
         event.setdefault("breadcrumbs", {}).setdefault("values", []).extend(
-            self._breadcrumbs
+            values
         )
 
     def _apply_user_to_event(self, event, hint, options):

@@ -4,6 +4,10 @@
 
 ### Various fixes & improvements
 
+- Fix breadcrumbs being sent in insertion order when their timestamps are
+  out of sequence; breadcrumbs are now sorted chronologically before being
+  attached to an event (#bugfix)  
+
 - Add client cert and key support to `HttpTransport` (#3258) by @grammy-jiang
 
   Add `cert_file` and `key_file` to your `sentry_sdk.init` to use a custom client cert and key. Alternatively, the environment variables `CLIENT_CERT_FILE` and `CLIENT_KEY_FILE` can be used as well.
