@@ -1295,8 +1295,12 @@ class Scope(object):
 
     def _apply_breadcrumbs_to_event(self, event, hint, options):
         # type: (Event, Hint, Optional[Dict[str, Any]]) -> None
+        # Sort breadcrumbs by timestamp to ensure chronological order
+        sorted_breadcrumbs = sorted(
+            self._breadcrumbs, key=lambda crumb: crumb.get("timestamp", datetime.min)
+        )
         event.setdefault("breadcrumbs", {}).setdefault("values", []).extend(
-            self._breadcrumbs
+            sorted_breadcrumbs
         )
 
     def _apply_user_to_event(self, event, hint, options):
