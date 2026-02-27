@@ -1295,8 +1295,21 @@ class Scope(object):
 
     def _apply_breadcrumbs_to_event(self, event, hint, options):
         # type: (Event, Hint, Optional[Dict[str, Any]]) -> None
+        # Ensure breadcrumbs are sent in chronological order (oldest first).
+        # Breadcrumbs are allowed to be added out of chronological order for
+        # convenience (e.g. replaying an existing trail), but the final event
+        # should always present them in a timeline.
+        try:
+            sorted_breadcrumbs = sorted(
+                self._breadcrumbs, key=lambda bc: bc.get("timestamp")
+            )
+        except TypeError:
+            # Some breadcrumb timestamps may be of mixed/uncomparable types.
+            # Fall back to insertion order in that case.
+            sorted_breadcrumbs = list(self._breadcrumbs)
+
         event.setdefault("breadcrumbs", {}).setdefault("values", []).extend(
-            self._breadcrumbs
+            sorted_breadcrumbs
         )
 
     def _apply_user_to_event(self, event, hint, options):
