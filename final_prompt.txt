@@ -1,0 +1,15 @@
+# Prompt
+
+When breadcrumbs are added to Sentry events with different timestamps, they show up in the wrong order. If you add breadcrumbs out of chronological order (like one from 5 days ago, then one from 10 days ago), they stay in that insertion order instead of being sorted by time.
+
+This is pretty confusing because when you look at the breadcrumb trail in Sentry, you expect to see events in the order they actually happened, not the order they were added to the code.
+
+The goal is to make sure breadcrumbs are always sorted chronologically (by timestamp) before being sent, so the oldest breadcrumb comes first and the newest comes last.
+
+There's a test script that reproduces this. Run it with:
+
+```bash
+python test_breadcrumb_ordering.py
+```
+
+It currently fails. Fix the issue so the test passes, and include a README.md explaining your changes.
